@@ -1,0 +1,11 @@
+1) Open up the mysql workbench software
+2) Click the file option on the top left then select "open mysql script".
+3) Browse and select the sql file in the folder.
+4) Run the sql script by clicking the lightning bolt icon
+5) Open up folder in visual studio code
+6) CD to frontend folder
+7) Type "node server.js"
+8) Open new terminal
+9) CD to backend folder
+10) Type "node server.js"
+11) In web browser, browse to http://localhost:3001

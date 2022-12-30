@@ -1,0 +1,10 @@
+//ashwin kavidasan
+//p2021656
+/DISM/FT/2B22
+
+1) Open mysql workbench.
+2) Click file then choose select mysql script.
+3) Browse to p2021656Assignment1.sql
+4) Run the script by clicking on the lightning icon.
+5) Open the main folder in visual studio code
+6) Type "node server.js" in the terminal.

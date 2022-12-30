@@ -1,0 +1,326 @@
+<!-- // Name: Ashwin kavidasan
+// Admin: P2021656
+// Class: DISM/FT/2B/22 -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SP movies</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+
+<body>
+    <div class="container container-to-append-buttons">
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var url = window.location.toString();
+        var movieName = url.split("?").slice(-1)[0];
+        console.log(movieName)
+        var movieNameSplit = movieName.split("%20")
+        console.log(movieNameSplit)
+        movieNameString = ""
+        for (var i = 0; i < movieNameSplit.length; i++) {
+            movieNameString = movieNameString + " " + movieNameSplit[i]
+        }
+
+        console.log(movieNameString)
+        try {
+                var token = localStorage.getItem('token')
+            } catch (e) {
+                console.error(e);
+                token = null
+            }
+            console.log("Token in index.js is ", token)
+            if (token != null) {
+                console.log("token is not null")
+                $.ajax({
+                    headers: { 'authorization': 'Bearer ' + token },
+                    url: 'http://localhost:8081/checkTokenType',
+                    type: 'GET',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    complete: function (response, textStatus, xhr) {
+                        console.log("type is", response.responseText)
+                        userType = response.responseText
+                        if (userType == "A") {
+                            addHtml = `
+                        <a href="http://localhost:3001/addGenre.html" type="button" class="btn btn-warning">Add Genre</a>
+                        <a href="http://localhost:3001/addMovie.html" type="button" class="btn btn-warning">Add Movie</a>
+                        <a href="http://localhost:3001/editMovie.html" type="button" class="btn btn-warning">Edit/Delete movie</a>
+                        <a href="http://localhost:3001/editGenre.html" type="button" class="btn btn-warning">Edit/Delete genre</a>
+                        <a href="http://localhost:3001/logout.html" class="btn btn-warning">Logout</a>
+                        `
+                            console.log(addHtml)
+                            $(".container-to-append-buttons").append(addHtml)
+                            $(".login-button").empty()
+                        } else if (userType == "RM") {
+                            addHtml = `<a href="http://localhost:3001/logout.html" class="btn btn-warning">Logout</a>`
+                            $(".container-to-append-buttons").append(addHtml)
+                            $(".login-button").empty()
+                        }
+                    }
+                })
+            } else if (token == null) {
+                console.log("Token is null")
+            }
+        $(document).ready(function () {
+            $("#dropdownMenu2").click(function () {
+                $("#appendbutton").empty();
+                console.log("drop menu 2 clicked")
+                var tmpToken = localStorage.getItem('token');
+                $.ajax({
+                    headers: { 'authorization': 'Bearer ' + tmpToken },
+                    url: 'http://localhost:8081/genre',
+                    type: 'GET',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (data, textStatus, xhr) {
+                        if (data != null) {
+                            console.log("===================", data)
+                            var postHtml = "";
+                            const response = data.UserData
+                            console.log("response is ", response)
+                            console.log("response.length is", response.length)
+                            var obj = JSON.parse(response);
+                            console.log("obj is ", obj)
+                            console.log("obj[0].genre is", obj[0].genre)
+                            console.log("obj.length", obj.length)
+                            for (var i = 0; i < obj.length; i++) {
+                                postHtml += `
+                                <a href="http://localhost:3001/movie.html?${obj[i].genre}" class="dropdown-item" type="button">${obj[i].genre}</a>
+                                `
+
+                            }
+                            $("#appendbutton").append(postHtml)
+                        }
+                    }
+                })
+            })
+            
+
+        })
+        
+        $.ajax({
+                url: 'http://localhost:8081/movieName3/' + movieNameString,
+                type: 'GET',
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (data, textStatus, xhr) {
+                    movieData = JSON.parse(data.movieData)
+                    console.log("Moviedata is ", movieData)
+                    var listOfGenres = ""
+                    for (var i = 0; i<movieData.length; i++) {
+                        listOfGenres = listOfGenres + ", " + movieData[i].genre
+                    }
+                    listOfGenres = listOfGenres.substring(1);
+
+                    console.log("list of genres is ", listOfGenres)
+                    description = movieData[0].description
+                    cast = movieData[0].cast
+                    opening_date = movieData[0].opening_date
+                    time = movieData[0].time
+                    console.log(description, cast, opening_date, time)
+                    movieNameString = movieNameString.substring(1);
+                    appendingImage = `<img class="col-md-8" src = "http://localhost:3001/images/${movieNameString}.jpg" alt = "Card image cap">`
+                    $(".image-of-movie").append(appendingImage)
+
+                    appendingMovieDetails = `
+                    <h5 class="font-weight-bold"> Cast: </h5><h5>${cast}</h5>
+                    <br>
+                    <h5 class="font-weight-bold"> Synopsis:</h5><h5> ${description}</h5>
+                    <br>
+                    <h5 class="font-weight-bold"> Duration: </h5><h5>${time}</h5>
+                    <br>
+                    <h5 class="font-weight-bold"> Release date: </h5><h5>${opening_date}</h5>
+                    <br>
+                    <h5 class="font-weight-bold"> Genre: </h5><h5>${listOfGenres}</h5>
+                    <br>`
+                    
+                    $(".text-to-append").append(appendingMovieDetails)
+                    $(".movieNameAppend").append(movieNameString)
+                    $.ajax({
+                        url: 'http://localhost:8081/movie/' + movieData[0].movieid + '/reviews',
+                        type: 'GET',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        success: function(data) {
+                            console.log(data.length)
+                            ratingsList = []
+                            reviewsList = []
+                            rater = []
+                            for (var l=0; l<data.length; l++) {
+                                ratingsList.push(data[l].rating)
+                                reviewsList.push(data[l].review)
+                                rater.push(data[l].username)
+                            }
+                            console.log(ratingsList, reviewsList, rater)
+                            sumOfRatings = 0
+                            for (var i=0; i<ratingsList.length; i++) {
+                                sumOfRatings = ratingsList[i] + sumOfRatings
+                            }
+                            avgOfRatings = sumOfRatings/ratingsList.length
+                            console.log("average is ",avgOfRatings)
+                            toAppendRatingAvg = `<h5 class="font-weight-bold"> Rating average: </h5 > <h5>${avgOfRatings}/5`
+                            $(".text-to-append").append(toAppendRatingAvg)
+                            reviewsHtml = ""
+                            for(var k=0; k<ratingsList.length; k++) {
+                                reviewsHtml += `
+                                <div class="card text-white bg-warning mb-3" ;">
+                                    
+                                    <div class="card-header text-dark font-weight-bold">${rater[k]}</div>
+                                    
+                                    <div class="card-body text-dark">
+                                        <p class="card-text">Review: ${reviewsList[k]}<br> Rating: ${ratingsList[k]}/5</p>
+                                    </div>
+                                </div>
+                                `
+                            }
+                            $(".reviews-appender").append(reviewsHtml)
+                        }
+
+                    })
+                }
+                
+            })
+
+    </script>
+    <div class="container">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a class="navbar-brand" href="http://localhost:3001">SP movies</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="http://localhost:3001">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Genres
+                            </button>
+                            <div class="dropdown-menu" id="appendbutton" aria-labelledby="dropdownMenu2">
+                                <!-- <button class="dropdown-item" type="button">Action</button>
+                                <button class="dropdown-item" type="button">Another action</button>
+                                <button class="dropdown-item" type="button">Something else here</button> -->
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item login-button">
+                        <a class="nav-link" href="http://localhost:3001/login.html">Login</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" id="search" href="http://localhost:3001/searchFunction.html">Search</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <h1 class="text-center movieNameAppend display-3 font-italic"></h1>
+        <hr class="mt-2 mb-3" />
+        <div class="row">
+            <div class="image-of-movie col-md-7">
+                
+            </div>
+            <div class="text-to-append col-md-5">
+                <!-- <h3 class="text-primary">Cast: john, tim, harry</h3>
+                <h3>LJflajdflkjasdflkjasdflj</h3> -->
+            </div>
+        </div>
+        <div class="text-center display-3 font-italic">
+            Reviews
+        </div>
+        <hr class="mt-2 mb-3" />
+        <div class="container text-center display-3 reviews-appender">
+        </div>
+        
+        <div class="review-button-add">
+            
+        </div>
+        
+
+    </div>
+    <script>
+            var url = window.location.toString();
+            var movieName = url.split("?").slice(-1)[0];
+            console.log(movieName)
+            var movieNameSplit = movieName.split("%20")
+            console.log(movieNameSplit)
+            movieNameString = ""
+            for (var i = 0; i < movieNameSplit.length; i++) {
+                movieNameString = movieNameString + " " + movieNameSplit[i]
+            }
+
+            console.log(movieNameString)
+            // try {
+            //     var userinfo = localStorage.getItem('userInfo')
+            // } catch (e) {
+            //     console.error(e);
+            //     userinfo = ""
+            // }
+            // console.log("***********", userinfo)
+            // if (userinfo != null) {
+            //     userinfo = JSON.parse(userinfo)
+            //     console.log("User type is ", userinfo[0].type)
+            //     if (userinfo[0].type == "RM") {
+            //         console.log("Ussser is RM")
+            //         addReviewButton = `
+            //     <a href = "http://localhost:3001/reviewAdd.html?${movieNameString}" class="btn btn-danger d-block"> Add review</a>
+            //     `
+            //         $(".review-button-add").append(addReviewButton)
+            //     }
+            // }
+            try {
+                    var token = localStorage.getItem('token')
+                } catch (e) {
+                    console.error(e);
+                    token = null
+                }
+                console.log("Token in index.js is ", token)
+                if (token != null) {
+                    console.log("token is not null")
+                    $.ajax({
+                        headers: { 'authorization': 'Bearer ' + token },
+                        url: 'http://localhost:8081/checkTokenType',
+                        type: 'GET',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        complete: function (response, textStatus, xhr) {
+                            console.log("type is", response.responseText)
+                            userType = response.responseText
+                            if (userType == "RM") {
+                                addReviewButton = `
+                                <a href = "http://localhost:3001/reviewAdd.html?${movieNameString}" class="btn btn-danger d-block"> Add review</a>
+                                `
+                                $(".review-button-add").append(addReviewButton)
+                            }
+                        }
+                    })
+                } else if (token == null) {
+                    console.log("Token is null")
+                }
+    </script>
+    
+
+
+
+</body>
+
+</html>

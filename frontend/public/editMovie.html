@@ -1,0 +1,327 @@
+<!-- // Name: Ashwin kavidasan
+// Admin: P2021656
+// Class: DISM/FT/2B/22 -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SP movies</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+
+<body>
+    <div class="container container-to-append-buttons">
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        try {
+                var token = localStorage.getItem('token')
+            } catch (e) {
+                console.error(e);
+                token = null
+            }
+            console.log("Token in index.js is ", token)
+            if (token != null) {
+                console.log("token is not null")
+                $.ajax({
+                    headers: { 'authorization': 'Bearer ' + token },
+                    url: 'http://localhost:8081/checkTokenType',
+                    type: 'GET',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    complete: function (response, textStatus, xhr) {
+                        console.log("type is", response.responseText)
+                        userType = response.responseText
+                        if (userType == "A") {
+                            addHtml = `
+                        <a href="http://localhost:3001/addGenre.html" type="button" class="btn btn-warning">Add Genre</a>
+                        <a href="http://localhost:3001/addMovie.html" type="button" class="btn btn-warning">Add Movie</a>
+                        <a href="http://localhost:3001/editMovie.html" type="button" class="btn btn-warning">Edit/Delete movie</a>
+                        <a href="http://localhost:3001/editGenre.html" type="button" class="btn btn-warning">Edit/Delete genre</a>
+                        <a href="http://localhost:3001/logout.html" class="btn btn-warning">Logout</a>
+                        `
+                            console.log(addHtml)
+                            $(".container-to-append-buttons").append(addHtml)
+                            $(".login-button").empty()
+                        } else if (userType == "RM") {
+                            window.location.assign("http://localhost:3001")
+                        }
+                    }
+                })
+            } else if (token == null) {
+                window.location.assign("http://localhost:3001")
+            }
+        $(document).ready(function () {
+            $("#dropdownMenu2").click(function () {
+                $("#appendbutton").empty();
+                console.log("drop menu 2 clicked")
+                var tmpToken = localStorage.getItem('token');
+                $.ajax({
+                    headers: { 'authorization': 'Bearer ' + tmpToken },
+                    url: 'http://localhost:8081/genre',
+                    type: 'GET',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (data, textStatus, xhr) {
+                        if (data != null) {
+                            console.log("===================", data)
+                            var postHtml = "";
+                            const response = data.UserData
+                            console.log("response is ", response)
+                            console.log("response.length is", response.length)
+                            var obj = JSON.parse(response);
+                            console.log("obj is ", obj)
+                            console.log("obj[0].genre is", obj[0].genre)
+                            console.log("obj.length", obj.length)
+                            for (var i = 0; i < obj.length; i++) {
+                                postHtml += `
+                                <a href="http://localhost:3001/movie.html?${obj[i].genre}" class="dropdown-item" type="button">${obj[i].genre}</a>
+                                `
+
+                            }
+                            $("#appendbutton").append(postHtml)
+                        }
+                    }
+                })
+            })
+        
+
+        
+
+        
+        })
+
+
+
+    </script>
+    <div class="container">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">SP movies</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="http://localhost:3001">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Genres
+                            </button>
+                            <div class="dropdown-menu" id="appendbutton" aria-labelledby="dropdownMenu2">
+                                <!-- <button class="dropdown-item" type="button">Action</button>
+                                <button class="dropdown-item" type="button">Another action</button>
+                                <button class="dropdown-item" type="button">Something else here</button> -->
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item login-button">
+                        <a class="nav-link" href="http://localhost:3001/login.html">Login</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" id="search" href="http://localhost:3001/searchFunction.html">Search</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <h3 class="text-danger ">Select which movie to edit/delete</h3>
+        <div class="form-for-edit">
+            
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="movietitle">New movie title:</label>
+            <input type="text" class="form-control" id="movietitle">
+        </div>
+        <div class="form-group">
+            <label for="actorlist">New actor list:</label>
+            <input placeholder="actor1, actor2, actor3" type="text" class="form-control" id="actorlist">
+            <small class="form-text text-danger">Seperate with comma</small>
+        </div>
+        <div class="form-group">
+            <label for="release-date">New release date:</label>
+            <input type="date" class="form-control" id="release_date">
+        </div>
+        <div class="form-group">
+            <label for="duration">New duration(mins):</label>
+            <input type="text" class="form-control" id="duration">
+            <small class="form-text text-danger">Eg. 155 mins</small>
+        </div>
+        <div class="form-group">
+            <label for="synopsis">New synopsis:</label>
+            <textarea class="form-control" id="synopsis" rows="3"></textarea>
+        </div>
+        
+        <div class="genre-list-selection">
+            <h3>Select new genre</h3>
+            <!-- <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                    <option value="4">Four</option>
+                    <option value="5">Five</option>
+                    <option value="6">Six</option>
+                    <option value="7">Seven</option>
+                    <option value="8">Eight</option> -->
+        </div>
+        <div>
+            <br>
+            <a type="button" id="submit-button" class="btn btn-success">Edit</a>
+            <a type="button" id="delete-button" class="btn btn-success">Delete</a>
+        </div>
+        
+    </div>
+    <script>
+        $.ajax({
+                url: 'http://localhost:8081/movie',
+                type: 'GET',
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (data, textStatus, xhr) {
+                    console.log(data[0])
+                    buttonhtml = ""
+                    for (var i = 0; i<data.length;i++) {
+                        buttonhtml += `
+                        <div class="form-check">
+                        <input value="${data[i].title}" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            ${data[i].title}
+                        </label>
+                        </div>`
+                    }
+                    $(".form-for-edit").append(buttonhtml)
+                    
+                }
+            })
+            $.ajax({
+
+                    url: 'http://localhost:8081/genre',
+                    type: 'GET',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (data, textStatus, xhr) {
+                        if (data != null) {
+                            console.log("===================", data)
+                            var postHtml = "";
+                            const response = data.UserData
+                            console.log("response is ", response)
+                            console.log("response.length is", response.length)
+                            var obj = JSON.parse(response);
+                            console.log("obj is ", obj)
+                            console.log("obj[0].genre is", obj[0].genre)
+                            console.log("obj.length", obj.length)
+                            for (var i = 0; i < obj.length; i++) {
+                                postHtml += `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="${obj[i].genre}" id="genreCheckBox">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                            ${obj[i].genre}
+                                        </label>
+                                </div>
+                                `
+                            }
+                            $(".genre-list-selection").append(postHtml)
+                        }
+                    }
+                })
+            $(document).ready(function () {
+                    $("#submit-button").click(function () {
+                        var oldmovietitle = $("input[type='radio'][name='flexRadioDefault']:checked").val();
+                        var movietitle = $('#movietitle').val()
+                        var actorlist = $('#actorlist').val()
+                        var release_date = $('#release_date').val()
+                        var duration = $('#duration').val()
+                        var synopsis = $('#synopsis').val()
+                        console.log(oldmovietitle, movietitle, actorlist, release_date)
+
+                        console.log("CLicked")
+                        var objOfSelection = document.querySelectorAll('input[type="checkbox"]:checked')
+                        console.log(objOfSelection.length)
+                        listOfGenres = ""
+                        for (var i = 0; i < objOfSelection.length; i++) {
+                            listOfGenres = listOfGenres + "," + objOfSelection[i].value
+                        }
+                        delete listOfGenres[""]
+                        var listOfGenres = listOfGenres.substring(1);
+
+
+                        var data = "{\"title\":\"" + movietitle + "\", \"cast\":\"" + actorlist + "\", \"opening_date\":\"" + release_date + "\", \"time\":\"" + duration + "\", \"description\":\"" + synopsis + "\"}";
+                        var dataGenres = "{\"genre\":\"" + listOfGenres + "\"}"
+
+                        console.log("list of genres is", listOfGenres)
+                        var tmpToken = localStorage.getItem('token');
+                        $.ajax({
+                            headers: { 'authorization': 'Bearer ' + tmpToken },
+                            url: `http://localhost:8081/movieUpdate/${oldmovietitle}`,
+                            type: 'PUT',
+                            data: data,
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (data) {
+                                console.log("Finished")
+                                $.ajax({
+                                    headers: { 'authorization': 'Bearer ' + tmpToken },
+                                    url: `http://localhost:8081/movieUpdateGenre/${oldmovietitle}`,
+                                    type: 'POST',
+                                    data: dataGenres,
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    complete: function(data) {
+                                        console.log("compledgted")
+                                        alert("Updated movie")
+                                    }
+                                })
+
+                            },
+                            error: function () {
+                                console.log("THer has been an eroror!")
+                                
+                            }
+                        })
+                    })
+                    $("#delete-button").click(function () {
+                        var movietitle = $("input[type='radio'][name='flexRadioDefault']:checked").val();
+                        var tmpToken = localStorage.getItem('token');
+                        $.ajax({
+                            headers: { 'authorization': 'Bearer ' + tmpToken },
+                            url: `http://localhost:8081/movie/${movietitle}`,
+                            type: 'DELETE',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (data) {
+                                console.log("Finished")
+                                alert(`Deleted ${movietitle}`)
+
+                            },
+                            error: function () {
+                                console.log("THer has been an eroror!")
+
+                            }
+                        })
+                    })
+
+                })
+    </script>
+
+
+
+</body>
+
+</html>
